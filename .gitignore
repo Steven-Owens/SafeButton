@@ -53,3 +53,4 @@ $RECYCLE.BIN/
 *.apk
 bin/classes.dex
 bin/resources.ap_
+bin/classes.dex
