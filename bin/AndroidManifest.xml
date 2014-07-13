@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.iscream"
+    android:versionCode="1"
+    android:versionName="1.0" >
+
+    <uses-sdk
+        android:minSdkVersion="18"
+        android:targetSdkVersion="19" />
+    <uses-permission android:name="android.permission.BLUETOOTH"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
+    <uses-permission android:name="android.permission.READ_CONTACTS"/>
+
+    <application
+        android:allowBackup="true"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme" >
+        <!-- app -->
+        <activity
+            android:name="com.example.safeButtton.ui.MainActivity"
+            android:label="@string/app_name" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name="com.example.safeButtton.ui.BLEScannerActivity" android:exported="false" android:permission="android.permission.BLUETOOTH_ADMIN"></activity>
+        <activity android:name="com.example.safeButtton.ui.BLEDeviceController" android:exported="false" android:permission="android.permission.BLUETOOTH_ADMIN"></activity>
+        <service android:permission="android.permission.BLUETOOTH_ADMIN" android:exported="false" android:name="IScreamService"></service>
+        <activity android:name="com.example.safeButtton.ui.RegisterActivity"></activity>
+        <activity android:name="com.example.safeButtton.ui.LoginActivity"></activity>
+        
+    </application>
+
+</manifest>
