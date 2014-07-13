@@ -1,6 +1,6 @@
 package com.example.safeButtton.ui;
 
-import com.example.iscream.R;
+import com.example.safeButtton.R;
 
 import android.app.ListActivity;
 import android.app.LoaderManager.LoaderCallbacks;

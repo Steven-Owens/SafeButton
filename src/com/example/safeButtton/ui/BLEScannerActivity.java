@@ -46,7 +46,7 @@
  */
 package com.example.safeButtton.ui;
 
-import com.example.iscream.R;
+import com.example.safeButtton.R;
 
 import android.app.Activity;
 import android.app.ListActivity;

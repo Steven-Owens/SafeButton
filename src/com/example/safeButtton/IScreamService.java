@@ -40,7 +40,7 @@ public class IScreamService extends IntentService {
 	public final static String EXTRA_DATA = "com.example.bluetooth.le.EXTRA_DATA";
 	
 	public final static UUID UUID_SAFE_DEVICE_DATA =
-            UUID.fromString("21819AB0-C937-4188-B0DB-B9621E1696CD"); //todo:put real UUID here
+            UUID.fromString("21819AB0-C937-4188-B0DB-B9621E1696CD");
 	public final static UUID UUID_SAFE_DEVICE_SERVICE =
             UUID.fromString("195AE58A-437A-489B-B0CD-B7C9C394BAE4");
 	
@@ -59,8 +59,8 @@ public class IScreamService extends IntentService {
 				mConnectionState = STATE_CONNECTED;
 				broadcastUpdate(intentAction);
 				Log.i(TAG, "Connected to GATT server.");
-				// Attempts to discover services after successful connection.
 				Log.i(TAG, "Attempting to start service discovery:"
+				// Attempts to discover services after successful connection.
 						+ mBluetoothGatt.discoverServices());
 			} else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
 				intentAction = ACTION_GATT_DISCONNECTED;
@@ -73,11 +73,14 @@ public class IScreamService extends IntentService {
 		@Override
 		public void onServicesDiscovered(BluetoothGatt gatt, int status) {
 			if (status == BluetoothGatt.GATT_SUCCESS) {
+				
 				BluetoothGattCharacteristic dataCharacteristic = mBluetoothGatt.getService(UUID_SAFE_DEVICE_SERVICE).getCharacteristic(UUID_SAFE_DEVICE_DATA);
 				final int charaProp = dataCharacteristic.getProperties();
+				//read the current value
 				mBluetoothGatt.readCharacteristic(dataCharacteristic);
 				if ((charaProp | BluetoothGattCharacteristic.PROPERTY_NOTIFY) > 0) {
 					Log.d(TAG, "NOTIFY avilable");
+					//register for Notification
                     setCharacteristicNotification(
                     		dataCharacteristic, true);
                 } else {
@@ -114,32 +117,15 @@ public class IScreamService extends IntentService {
 			final BluetoothGattCharacteristic characteristic) {
 		final Intent intent = new Intent(action);
 		Log.d(TAG, "update:" + characteristic.getUuid().toString());
-		// This is special handling for the Heart Rate Measurement profile. Data
-		// parsing is
-		// carried out as per profile specifications:
-		// http://developer.bluetooth.org/gatt/characteristics/Pages/CharacteristicViewer.aspx?u=org.bluetooth.characteristic.heart_rate_measurement.xml
 		if (UUID_SAFE_DEVICE_DATA.equals(characteristic.getUuid())) {
-			//todo:refector into correct format
-			/*int flag = characteristic.getProperties();
-			int format = -1;
-			if ((flag & 0x01) != 0) {
-				format = BluetoothGattCharacteristic.FORMAT_UINT16;
-				Log.d(TAG, "Heart rate format UINT16.");
-			} else {
-				format = BluetoothGattCharacteristic.FORMAT_UINT8;
-				Log.d(TAG, "Heart rate format UINT8.");
-			}
-			final int heartRate = characteristic.getIntValue(format, 1);
-			Log.d(TAG, String.format("Received heart rate: %d", heartRate));
-			intent.putExtra(EXTRA_DATA, String.valueOf(heartRate));*/
+			//todo:make this more specific
 			final byte[] data = characteristic.getValue();
 			if (data != null && data.length > 0) {
 				final StringBuilder stringBuilder = new StringBuilder(
 						data.length);
 				for (byte byteChar : data)
 					stringBuilder.append(String.format("%02X ", byteChar));
-				intent.putExtra(EXTRA_DATA, new String(data) + "\n"
-						+ stringBuilder.toString());
+				intent.putExtra(EXTRA_DATA, stringBuilder.toString());
 				Log.d(TAG,"data: " + stringBuilder.toString());
 				
 			}
@@ -216,6 +202,7 @@ public class IScreamService extends IntentService {
      *         callback.
      */
     public boolean connect(final String address) {
+        //todo: move this code to handleIntent
         if (mBluetoothAdapter == null || address == null) {
             Log.w(TAG, "BluetoothAdapter not initialized or unspecified address.");
             return false;
@@ -301,14 +288,6 @@ public class IScreamService extends IntentService {
             return;
         }
         mBluetoothGatt.setCharacteristicNotification(characteristic, enabled);
-
-        // This is specific to Heart Rate Measurement.
-        /*if (UUID_SAFE_DEVICE_DATA.equals(characteristic.getUuid())) {
-            BluetoothGattDescriptor descriptor = characteristic.getDescriptor(
-                    UUID.fromString(CLIENT_CHARACTERISTIC_CONFIG));
-            descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
-            mBluetoothGatt.writeDescriptor(descriptor);
-        }*/
     }
 
     /**
@@ -326,6 +305,7 @@ public class IScreamService extends IntentService {
 	public IScreamService() {
 		super("IScreamServiceWorkerThread");
 		Log.i(TAG, "creating IScreamService");
+	    //setting up the Service to restart if stopped
 		setIntentRedelivery(true);
 	}
 
@@ -334,11 +314,19 @@ public class IScreamService extends IntentService {
 		super.onDestroy();
 	}
 
-	public static Intent makeIntent(Context context) {
-		Log.i(TAG, "making Intent");
+	
+	public static Intent makeBindIntent(Context context) {
+		Log.i(TAG, "making bind Intent");
 		Intent newIntent = new Intent(context, IScreamService.class);
 		return newIntent;
 	}
+	
+	/*public static Intent makeStartedIntent(Context context, final String address) {
+		Log.i(TAG, "making started Intent");
+		Intent newIntent = new Intent(context, IScreamService.class);
+		newIntent.putExtra("deviceAddress", address);
+		return newIntent;
+	}*/
 
 	@Override
 	protected void onHandleIntent(Intent intent) {

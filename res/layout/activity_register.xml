@@ -13,14 +13,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/username"
-            android:labelFor="@+id/RegisterUsernameText" />
+            android:labelFor="@+id/YourNameText" />
 
         <EditText
-            android:id="@+id/RegisterUsernameText"
+            android:id="@+id/YourNameText"
             android:layout_width="0dip"
             android:layout_height="wrap_content"
             android:layout_weight="1" 
-            android:inputType="text|textNoSuggestions" >
+            android:inputType="textPersonName" >
 
             <requestFocus />
         </EditText>
@@ -35,15 +35,38 @@
             android:id="@+id/textView2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/password" 
-            android:labelFor="@+id/RegisterPasswordText"/>
+            android:labelFor="@+id/YourPhoneText"
+            android:text="@string/YourPhoneNumber" />
 
         <EditText
-            android:id="@+id/RegisterPasswordText"
+            android:id="@+id/YourPhoneText"
             android:layout_width="0dip"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:inputType="textPassword" />
+            android:inputType="phone" />
+
+    </LinearLayout>
+    
+     <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <TextView
+            android:id="@+id/Label3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:labelFor="@+id/ContactNameText"
+            android:text="@string/ICEContactName" />
+
+        <EditText
+            android:id="@+id/ContactNameText"
+            android:layout_width="0dip"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" 
+            android:inputType="textPersonName" >
+
+            <requestFocus />
+        </EditText>
 
     </LinearLayout>
 
@@ -55,15 +78,15 @@
             android:id="@+id/textView3"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/email" 
-            android:labelFor="@+id/emailText"/>
+            android:labelFor="@+id/ICEPhoneText"
+            android:text="@string/ICEContactPhoneNumber" />
 
         <EditText
-            android:id="@+id/emailText"
+            android:id="@+id/ICEPhoneText"
             android:layout_width="0dip"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:inputType="textEmailAddress" />
+            android:inputType="phone" />
 
     </LinearLayout>
 

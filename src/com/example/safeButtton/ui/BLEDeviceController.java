@@ -1,7 +1,7 @@
 package com.example.safeButtton.ui;
 
-import com.example.iscream.R;
 import com.example.safeButtton.IScreamService;
+import com.example.safeButtton.R;
 
 import android.app.Activity;
 import android.bluetooth.BluetoothDevice;
@@ -42,7 +42,7 @@ private final ServiceConnection mServiceConnection = new ServiceConnection() {
 
     @Override
     public void onServiceDisconnected(ComponentName componentName) {
-    	Log.d(TAG, "discoonected from BluetoothService");
+    	Log.d(TAG, "disconnected from BluetoothService");
         mBluetoothLeService = null;
     }
 };
@@ -89,7 +89,8 @@ private void displayData(String data) {
 			mDeviceAddress = device.getAddress();
 		}
 		
-		Intent ServiceIntent = IScreamService.makeIntent(this);
+		Intent ServiceIntent = IScreamService.makeBindIntent(this);
+		Log.d(TAG, "binding to serivce");
 		bindService(ServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
 	}
 	

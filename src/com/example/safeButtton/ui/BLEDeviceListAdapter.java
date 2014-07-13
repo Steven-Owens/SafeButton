@@ -47,8 +47,7 @@
 package com.example.safeButtton.ui;
 
 
-
-import com.example.iscream.R;
+import com.example.safeButtton.R;
 
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
