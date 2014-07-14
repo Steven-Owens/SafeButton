@@ -1,8 +1,19 @@
 package com.example.safeButtton;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
 
 import android.app.IntentService;
 import android.bluetooth.BluetoothAdapter;
@@ -14,8 +25,10 @@ import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
@@ -133,6 +146,8 @@ public class IScreamService extends IntentService {
 		}
 	};
 
+	private boolean alarmed = false;
+
 	private void broadcastUpdate(final String action) {
 		final Intent intent = new Intent(action);
 		Log.d(TAG, "broadcast: " + action);
@@ -153,7 +168,18 @@ public class IScreamService extends IntentService {
 					stringBuilder.append(String.format("%02X ", byteChar));
 				intent.putExtra(EXTRA_DATA, stringBuilder.toString());
 				Log.d(TAG, "data: " + stringBuilder.toString());
-
+				if(stringBuilder.toString().contains("01")){
+	            	//alarm
+	            	if (!alarmed ){
+	            		alarm();
+	            	}
+	            	alarmed = true;
+	            } else if (stringBuilder.toString().contains("02")){
+	            	//reset alarm
+	            	 Log.d(BroadcastTAG, "resetting");
+	            	alarmed = false;
+	            	//todo: code to server.
+	            }
 			}
 		} else {
 			// For all other profiles, writes the data formatted in HEX.
@@ -238,6 +264,8 @@ public class IScreamService extends IntentService {
 					"BluetoothAdapter not initialized or unspecified address.");
 			return false;
 		}
+		
+		//registerReceiver(mAlarmReceiver, makeGattUpdateIntentFilter());
 
 		// Previously connected device. Try to reconnect.
 		if (mBluetoothDeviceAddress != null
@@ -269,6 +297,8 @@ public class IScreamService extends IntentService {
 		return true;
 	}
 
+	
+
 	/**
 	 * Disconnects an existing connection or cancel a pending connection. The
 	 * disconnection result is reported asynchronously through the
@@ -280,6 +310,7 @@ public class IScreamService extends IntentService {
 			Log.w(TAG, "BluetoothAdapter not initialized");
 			return;
 		}
+		//unregisterReceiver(mAlarmReceiver);
 		mBluetoothGatt.disconnect();
 	}
 
@@ -291,6 +322,7 @@ public class IScreamService extends IntentService {
 		if (mBluetoothGatt == null) {
 			return;
 		}
+		//unregisterReceiver(mAlarmReceiver);
 		mBluetoothGatt.close();
 		mBluetoothGatt = null;
 	}
@@ -356,6 +388,8 @@ public class IScreamService extends IntentService {
 	public void onDestroy() {
 		Log.i(TAG, "entering onDestroy");
 		closing.set(true);
+		disconnect();
+		close();
 		super.onDestroy();
 	}
 
@@ -376,6 +410,68 @@ public class IScreamService extends IntentService {
 	protected void onHandleIntent(Intent intent) {
 		// TODO Auto-generated method stub
 
+	}
+	
+	private IntentFilter makeGattUpdateIntentFilter() {
+		final IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(IScreamService.ACTION_DATA_AVAILABLE);
+        return intentFilter;
+	}
+	
+	public final static String BroadcastTAG = TAG + ".mAlarmReceiver";
+	public final static String url = "http://10.4.98.65/~srinibadri/iScream/safebutton.php";
+	
+	private BroadcastReceiver mAlarmReceiver = new BroadcastReceiver(){
+		
+		boolean alarmed = false;
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			final String action = intent.getAction();
+			if (IScreamService.ACTION_DATA_AVAILABLE.equals(action)) {
+	            if(intent.getStringExtra(IScreamService.EXTRA_DATA).contains("01")){
+	            	//alarm
+	            	if (!alarmed){
+	            		alarm();
+	            	}
+	            	alarmed = true;
+	            } else if (intent.getStringExtra(IScreamService.EXTRA_DATA).contains("02")){
+	            	//reset alarm
+	            	 Log.d(BroadcastTAG, "resetting");
+	            	alarmed = false;
+	            	//todo: code to server.
+	            }
+	        }
+		}
+		
+	};
+	
+	public static void alarm(){
+		Log.d(BroadcastTAG, "alarmed");
+		HttpClient httpclient = new DefaultHttpClient();
+		Log.d(BroadcastTAG, "creating post");
+        HttpPost httppost = new HttpPost(url);
+        // Add your data
+        List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(3);
+        nameValuePairs.add(new BasicNameValuePair("alarm", "true"));
+        nameValuePairs.add(new BasicNameValuePair("sender", "Isabel"));
+        try {
+
+            //nameValuePairs.add(new BasicNameValuePair("latitude", Double.toString(pLat)));
+            //nameValuePairs.add(new BasicNameValuePair("longtitude", Double.toString(pLong)));
+
+            Log.d(BroadcastTAG, "Encoding");
+            httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+
+            // Execute HTTP Post Request
+            Log.d(BroadcastTAG, "posting");
+            HttpResponse response = httpclient.execute(httppost);
+            Log.d(BroadcastTAG, "posted");
+        } catch (ClientProtocolException e) {
+        	Log.e(BroadcastTAG, e.getMessage());
+        } catch (IOException e) {
+        	Log.e(BroadcastTAG, e.getMessage());
+        }
 	}
 
 }

@@ -112,6 +112,7 @@ private void displayData(String data) {
 	
 	@Override
     protected void onDestroy() {
+		unbindService(mServiceConnection);
 		super.onDestroy();
 	}
 	@Override

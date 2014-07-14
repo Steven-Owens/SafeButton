@@ -1,16 +1,20 @@
 package com.example.safeButtton.ui;
 
+import com.example.safeButtton.IScreamService;
 import com.example.safeButtton.R;
 
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 
 public class MainActivity extends Activity {
+	
+	public final static String TAG = "iscream.MainActivity";
 	
 	public final static int REQUEST_ENABLE_BT = 1;
 
@@ -18,6 +22,7 @@ public class MainActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		Log.d(TAG, "OnCreate");
 		setContentView(R.layout.activity_main);
 		
 		Button connectBluetoothButton = (Button) findViewById(R.id.ConnectDeviceButton);
@@ -57,6 +62,25 @@ public class MainActivity extends Activity {
 			public void onClick(View v) {
 				//todo:add Register stuff here
 				startActivity(new Intent(tempThis, LoginActivity.class));
+			}
+		});
+		
+		//debug code
+		Button DebugButton = (Button) findViewById(R.id.debugButton);
+		DebugButton.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				//todo:add Register stuff here
+				Log.d(TAG, "debug");
+				new Thread(new Runnable() {
+
+					@Override
+					public void run() {
+						Log.d(TAG, "thread run");
+						IScreamService.alarm();
+					}
+				}).start();
 			}
 		});
 		
